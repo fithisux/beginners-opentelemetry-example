@@ -3,7 +3,7 @@ from flask import Flask
 import time
 import requests
 import os
-from opentelemetry import propagate, trace
+from opentelemetry import propagate, trace, context, baggage
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.resources import Resource, ResourceAttributes
@@ -69,7 +69,17 @@ def index():
             sgh
         )
 
-    with tracer.start_as_current_span("foo3", context=ctx):
+    app.logger.debug(f"FOO3 ctx {ctx}")
+
+    parentag = baggage.get_baggage('parentag', ctx) or 3
+    ctx = baggage.set_baggage('parentag', 3, ctx)
+    context.attach(ctx)
+
+    context.attach(ctx)
+
+    with tracer.start_as_current_span("foo3") as current_span:
+
+        current_span.set_attribute("parent.value", parentag)
         sleep()
     return 'OK', 200
 

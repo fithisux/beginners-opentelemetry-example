@@ -2,7 +2,7 @@ import flask
 from flask import Flask
 import os
 import requests
-from opentelemetry import propagate, trace
+from opentelemetry import propagate, trace, context, baggage
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.resources import Resource, ResourceAttributes
@@ -63,8 +63,16 @@ def index():
             None,
             sgh
         )
+
     app.logger.debug(f"FOO1 ctx {ctx}")        
-    with tracer.start_as_current_span("foo1", context=ctx):
+
+    parentag = baggage.get_baggage('parentag', ctx) or 1
+    ctx = baggage.set_baggage('parentag', 1, ctx)
+    context.attach(ctx)
+
+    with tracer.start_as_current_span("foo1") as current_span:
+
+        current_span.set_attribute("parentag.value", parentag)
 
         call_api_02 = requests.Request(
             "GET", "http://api_02:5000/"
