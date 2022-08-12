@@ -1,9 +1,12 @@
 # This is a beginner opentelemetry example for Pythonistas
 
 
+**There is a Medium [article](https://fithis2001.medium.com/beginning-open-telemetry-manual-instrumentation-e1359ac5d34a) based on this codebase !!!**
+
+
 This tutorial code is based on the excellent Medium article [Use Zipkin to Trace Requests in Flask Application](https://medium.com/@eng.mohamed.m.saeed/use-zipkin-to-trace-requests-in-flask-application-68886f02e46) which allows the manual instrumentation of a microservice cluster to zipkin.
 
-Please consulkt this article for usage instructions (TLDR `docker compose up`).
+Please consult this article for usage instructions (TLDR `docker compose up`).
 
 The main limitation of that article was py_zipkin. The py_zipkin specific code could not be easily ported to other exporters like [Jaeger](https://www.jaegertracing.io/docs/1.18/opentelemetry/).
 
