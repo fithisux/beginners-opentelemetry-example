@@ -79,7 +79,7 @@ def index():
 
     with tracer.start_as_current_span("foo3") as current_span:
 
-        current_span.set_attribute("parent.value", parentag)
+        current_span.set_attribute("upstream.service", parentag)
         sleep()
     return 'OK', 200
 

@@ -80,7 +80,7 @@ def index():
 
     with tracer.start_as_current_span("foo2") as current_span:
 
-        current_span.set_attribute("parent.value", parentag)
+        current_span.set_attribute("upstream.service", parentag)
 
         call_api_03 = requests.Request(
             "GET", "http://api_03:5000/"
