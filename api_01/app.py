@@ -2,7 +2,7 @@ import flask
 from flask import Flask
 import os
 import requests
-from opentelemetry import propagate, trace
+from opentelemetry import trace
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.resources import Resource, ResourceAttributes
@@ -34,20 +34,6 @@ span_processor = BatchSpanProcessor(zipkin_exporter)
 # add to the tracer
 trace.get_tracer_provider().add_span_processor(span_processor)
 
-PROPAGATOR = propagate.get_global_textmap()
-
-def get_header_from_flask_request(_, request, key):
-    return request.headers.get_all(key)
-
-def set_header_into_requests_request(_, request: requests.Request,
-                                        key: str, value: str):
-    request.headers[key] = value
-
-
-class SetterGetterHelper:
-    set = set_header_into_requests_request
-    get = get_header_from_flask_request
-
 
 @app.before_request
 def log_request_info():
@@ -57,31 +43,18 @@ def log_request_info():
 
 @app.route('/')
 def index():
-    sgh = SetterGetterHelper()
-    ctx = PROPAGATOR.extract(
-            flask.request,
-            None,
-            sgh
-        )
-    app.logger.debug(f"FOO1 ctx {ctx}")        
-    with tracer.start_as_current_span("foo1", context=ctx):
+
+    app.logger.debug(f"FOO1 rq {flask.request.headers}")
+       
+    with tracer.start_as_current_span("foo1"):
 
         call_api_02 = requests.Request(
             "GET", "http://api_02:5000/"
         )
-        PROPAGATOR.inject(
-            call_api_02,
-            None,
-            sgh
-        )
+
 
         call_api_03 = requests.Request(
             "GET", "http://api_03:5000/"
-        )
-        PROPAGATOR.inject(
-            call_api_03,
-            None,
-            sgh
         )
 
 
